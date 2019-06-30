@@ -1,3 +1,3 @@
-module github.com/oleewere/logprocessor
+module github.com/oleewere/logp
 
 go 1.12
