@@ -1,0 +1,33 @@
+GIT_REV_SHORT = $(shell git rev-parse --short HEAD)
+GITHUB_TOKEN := $(shell git config --global --get github.token || echo $$GITHUB_TOKEN)
+
+ifeq ("$(shell git rev-list --tags --max-count=1)", "")
+  LAST_RELEASE="v0.0.0"
+else
+  LAST_RELEASE=$(shell git describe --tags $(shell git rev-list --tags --max-count=1))
+endif
+
+SNAPSHOT_VERSION=$(shell echo $(LAST_RELEASE) | awk '{split($$0,a,"."); print "v"a[1]+1"."0"."0}')
+
+ifeq ("$(shell git name-rev --tags --name-only $(shell git rev-parse HEAD))", "undefined")
+	VERSION_FOR_BUILD="$(SNAPSHOT_VERSION)-SNAPSHOT"
+else
+	VERSION_FOR_BUILD=$(shell git name-rev --tags --name-only $(shell git rev-parse HEAD) | sed 's/\^.*$///')
+endif
+
+build:
+	go build -ldflags "-X main.GitRevString=$(GIT_REV_SHORT) -X main.Version=$(VERSION_FOR_BUILD)" -o logp cmd/logp/main.go
+
+install:
+	go install -ldflags "-X main.GitRevString=$(GIT_REV_SHORT) -X main.Version=$(VERSION_FOR_BUILD)" cmd/logp/main.go
+
+test:
+	go test
+
+all: build test
+
+clean:
+	rm -rf dist
+
+run:
+	go run cmd/logp/main.go
