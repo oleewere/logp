@@ -4,12 +4,12 @@ readlinkf(){
 }
 
 if [ "$(uname -s)" = 'Linux' ]; then
-  CMCTL_SCRIPT_DIR="`dirname "$(readlink -f "$0")"`"
+  LOGP_SCRIPT_DIR="`dirname "$(readlink -f "$0")"`"
 else
-  CMCTL_SCRIPT_DIR="`dirname "$(readlinkf "$0")"`"
+  LOGP_SCRIPT_DIR="`dirname "$(readlinkf "$0")"`"
 fi
 
-CMCTL_ROOT_DIR="`dirname \"$CMCTL_SCRIPT_DIR\"`"
+LOGP_ROOT_DIR="`dirname \"$LOGP_SCRIPT_DIR\"`"
 
 function print_help() {
   cat << EOF
@@ -101,9 +101,9 @@ function release_and_push_actual_branch() {
 
 function update_readme_version() {
   local next_release="$1"
-  local readme_md_location="$CMCTL_ROOT_DIR/README.md"
+  local readme_md_location="$LOGP_ROOT_DIR/README.md"
   local version_number=$(get_version_number $next_release)
-  sed -i.bak "s/CMCTL_VERSION=[[:digit:]]\.[[:digit:]]\.[[:digit:]]/CMCTL_VERSION=${version_number}/" "$readme_md_location"
+  sed -i.bak "s/LOGP_VERSION=[[:digit:]]\.[[:digit:]]\.[[:digit:]]/LOGP_VERSION=${version_number}/" "$readme_md_location"
   rm "$readme_md_location.bak"
   git add "$readme_md_location"
   git commit -m "Update README.md (for release version: $next_release)"
@@ -172,11 +172,11 @@ function release_patch() {
 }
 
 function run_release() {
-  docker run -w /go/src/github.com/oleewere/logp -e GITHUB_TOKEN=$GITHUB_TOKEN --rm -v $CMCTL_ROOT_DIR/vendor/:/go/src/ -v $CMCTL_ROOT_DIR:/go/src/github.com/oleewere/logp goreleaser/goreleaser:latest --debug --rm-dist
+  docker run -w /go/src/github.com/oleewere/logp -e GITHUB_TOKEN=$GITHUB_TOKEN --rm -v $LOGP_ROOT_DIR/vendor/:/go/src/ -v $LOGP_ROOT_DIR:/go/src/github.com/oleewere/logp goreleaser/goreleaser:latest --debug --rm-dist
 }
 
 function build_only() {
-  docker run -w /go/src/github.com/oleewere/logp -e GITHUB_TOKEN=$GITHUB_TOKEN --rm -v $CMCTL_ROOT_DIR/vendor/:/go/src/ -v $CMCTL_ROOT_DIR:/go/src/github.com/oleewere/logp goreleaser/goreleaser:latest --snapshot --debug --rm-dist --skip-publish
+  docker run -w /go/src/github.com/oleewere/logp -e GITHUB_TOKEN=$GITHUB_TOKEN --rm -v $LOGP_ROOT_DIR/vendor/:/go/src/ -v $LOGP_ROOT_DIR:/go/src/github.com/oleewere/logp goreleaser/goreleaser:latest --snapshot --debug --rm-dist --skip-publish
 }
 
 function main() {
